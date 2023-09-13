@@ -258,7 +258,6 @@ class GamesSpider(BaseSpider):
     for p_i, p_box in enumerate(player_boxes[:4]):
       player_name = p_box.xpath('.//table[@class="inline-table"]//tr[1]//td[2]//a/text()').extract()
       player_hrefs = p_box.xpath('.//table[@class="inline-table"]//tr[1]//td[2]//a/@href').extract()
-      print(f"{player_name}: {player_hrefs}")
       position_information_raw = p_box.xpath('.//table[@class="inline-table"]//tr[2]//td//text()').extract()
       for player_i, raw_value in enumerate(position_information_raw):
         raw_value = raw_value.replace(" ", "")
