@@ -2,3 +2,6 @@ __pycache__
 .vscode
 .env
 .scrapy
+*.code-workspace
+*.json
+*.sh

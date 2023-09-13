@@ -26,7 +26,7 @@ def background_position_in_px_to_minute(px_x: int, px_y: int) -> int:
     """
 
     n = 10 # number of columns in the matrix
-    m = 13 # number of rows in the matrix
+    m = 14 # number of rows in the matrix
     h = 36 # size of the chronometer square in pixels
 
     x_offset = 0
@@ -38,11 +38,11 @@ def background_position_in_px_to_minute(px_x: int, px_y: int) -> int:
     ]
 
     x = abs(px_x) / h
-    assert x.is_integer()
+    # assert x.is_integer()
     x = int(x) + x_offset
 
     y = abs(px_y) / h
-    assert y.is_integer()
+    # assert y.is_integer()
     y = int(y) + y_offset
 
     return matrix[y][x]

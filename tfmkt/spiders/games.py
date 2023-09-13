@@ -51,6 +51,7 @@ class GamesSpider(BaseSpider):
     # exit(1)
 
     game_links = response.css('a.ergebnis-link')
+    # print(len(game_links), "links_found")
     for game_link in game_links:
       href = game_link.xpath('@href').get()
 
@@ -140,6 +141,16 @@ class GamesSpider(BaseSpider):
     home_club_position = home_club_box[0].xpath('p/text()').get()
     away_club_position = away_club_box[0].xpath('p/text()').get()
 
+    formations = response.css('div.aufstellung-unterueberschrift')
+    if len(formations) > 0:
+      home_club_formation = response.css('div.aufstellung-unterueberschrift')[0].xpath('text()').get().strip('\n').strip('\t')
+      away_club_formation = "NAN"
+    if len(formations) > 1:
+      away_club_formation = response.css('div.aufstellung-unterueberschrift')[1].xpath('text()').get().strip('\n').strip('\t')
+    else:
+      home_club_formation = "NAN"
+      away_club_formation = "NAN"
+
     # extract date and time "box" attributes
     datetime_box = game_box.css('div.sb-spieldaten')[0]
 
@@ -187,6 +198,8 @@ class GamesSpider(BaseSpider):
         'href': away_club_href
       },
       'away_club_position': away_club_position,
+      'home_formation': home_club_formation,
+      'away_formation': away_club_formation,
       'result': result,
       'matchday': matchday,
       'date': date,
@@ -204,6 +217,68 @@ class GamesSpider(BaseSpider):
       item["away_manager"] = {
         'name': away_manager_name
       }
+    lineup_href = base['href'].replace('index', 'aufstellung')
+
+    cb_kwargs = {
+      'base': {
+        'main': item,
+      }
+    }
+
+    yield response.follow(lineup_href, self.parse_game_lineup, cb_kwargs=cb_kwargs)
+
+  def parse_game_lineup(self, response, base):
+    """Parse games and fixutres page. From this page follow to each game page.
+
+    @url https://www.transfermarkt.co.uk/spielbericht/aufstellung/spielbericht/3098550
+    @returns items 1 1
+    @cb_kwargs {"base": {"main": "current game information"}}
+    @scrapes type href parent game_id result matchday date stadium attendance home_manager away_manager
+    """
+    # parsing line up in the other page, for the 4 positions line up
+    # response.css('div.table-footer')[0].xpath('table')[0].xpath('tr//td//text()')[2].get()
+    footer_boxes = response.css('div.table-footer')
+    lineup_item = {}
+    for box in footer_boxes:
+      box_text_values = box.xpath('tr//td//text()')
+      for text_value in box_text_values:
+        text_value = box_text_values.get()
+        text_value = text_value.replace(" ", "")
+        value_key, value = text_value.split(":")
+        lineup_item[value_key] = value
     
+    # parsing each component of the lineup
+    # for 4 different sb-formation and 1,3,5 position.
+    # response.css('div.row, sb-formation')[0].xpath('.//table[@class="inline-table"]//tr')[1].xpath('td//text()')[0].get()
+    # response.css('div.responsive-table')[3].xpath('.//table[@class="inline-table"]//tr[2]//td//text()').extract()
+    player_boxes = response.css('div.responsive-table')
+    player_boxes_layout = ["home_team", "away_team", "home_bench", "away_bench"]
+    extended_lineup = {}
+    lineup_players = []
+    for p_i, p_box in enumerate(player_boxes[:4]):
+      player_name = p_box.xpath('.//table[@class="inline-table"]//tr[1]//td[2]//a/text()').extract()
+      player_hrefs = p_box.xpath('.//table[@class="inline-table"]//tr[1]//td[2]//a/@href').extract()
+      print(f"{player_name}: {player_hrefs}")
+      position_information_raw = p_box.xpath('.//table[@class="inline-table"]//tr[2]//td//text()').extract()
+      for player_i, raw_value in enumerate(position_information_raw):
+        raw_value = raw_value.replace(" ", "")
+        cut_player_ref = player_hrefs[player_i].split("/saison")[0].replace('leistungsdatendetails', 'profil')
+        if "," in raw_value:
+          position_key, mv_value = raw_value.split(",")
+          extended_lineup.setdefault(
+            player_boxes_layout[p_i], {}
+          ).setdefault(
+            position_key, []
+          ).append(mv_value)
+          lineup_players.append({"player_name": player_name[player_i], "link": cut_player_ref, "position": position_key, "market_value": mv_value})
+
+    lineup_item["positions"] = extended_lineup
+    lineup_item["players"] = lineup_players
+
+    item = {
+      **base,
+      "lineup": lineup_item
+    }
+
     yield item
  

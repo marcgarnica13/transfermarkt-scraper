@@ -116,7 +116,11 @@ class CompetitionsSpider(BaseSpider):
       if tier in [
         'First Tier',
         'Domestic Cup',
-        'Domestic Super Cup'
+        'Domestic Super Cup',
+        'Second Tier',
+        'Third Tier',
+        'Fourth Tier',
+        'Fifth Tier',
       ]:
         parameterized_tier = underscore(parameterize(tier))
         competition_row = box_rows[idx + 1]

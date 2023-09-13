@@ -16,7 +16,9 @@ EXTENSIONS = {
    'scrapy.extensions.closespider.CloseSpider': 500
 }
 DOWNLOADER_MIDDLEWARES = {
-   'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware': 500
+   'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware': 500,
+   'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+   'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400
 }
 
 CLOSESPIDER_PAGECOUNT = 0
@@ -30,3 +32,8 @@ HTTPCACHE_DIR = 'httpcache'
 
 # https://docs.scrapy.org/en/latest/topics/request-response.html?highlight=REQUEST_FINGERPRINTER_IMPLEMENTATION#std-setting-REQUEST_FINGERPRINTER_IMPLEMENTATION
 REQUEST_FINGERPRINTER_IMPLEMENTATION = '2.7'
+
+RETRY_TIMES = 10
+CONCURRENT_ITEMS = 10
+DOWNLOAD_TIMEOUT = 3600
+DOWNLOAD_DELAY = 0.250
