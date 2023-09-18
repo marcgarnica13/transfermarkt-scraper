@@ -25,6 +25,8 @@ CLOSESPIDER_PAGECOUNT = 0
 
 LOG_LEVEL = 'ERROR'
 
+DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
+
 # HttpCacheMiddleware settings
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
 HTTPCACHE_ENABLED = True
