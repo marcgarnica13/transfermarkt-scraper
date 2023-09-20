@@ -254,7 +254,7 @@ class GamesSpider(BaseSpider):
     player_boxes = response.css('div.responsive-table')
     player_boxes_layout = ["home_team", "away_team", "home_bench", "away_bench"]
     extended_lineup = {}
-    lineup_players = []
+    lineup_players = {}
     for p_i, p_box in enumerate(player_boxes[:4]):
       player_name = p_box.xpath('.//table[@class="inline-table"]//tr[1]//td[2]//a/text()').extract()
       player_hrefs = p_box.xpath('.//table[@class="inline-table"]//tr[1]//td[2]//a/@href').extract()
@@ -269,7 +269,9 @@ class GamesSpider(BaseSpider):
           ).setdefault(
             position_key, []
           ).append(mv_value)
-          lineup_players.append({"player_name": player_name[player_i], "link": cut_player_ref, "position": position_key, "market_value": mv_value})
+          lineup_players.setdefault(player_boxes_layout[p_i], []).append(
+            {"player_name": player_name[player_i], "link": cut_player_ref, "position": position_key, "market_value": mv_value}
+          )
 
     lineup_item["positions"] = extended_lineup
     lineup_item["players"] = lineup_players
