@@ -65,17 +65,31 @@ class InjuriesSpider(BaseSpider):
         @returns requests 1 1
         @cb_kwargs {"parent": "dummy"}
         @scrapes type href parent
+
+        
+        inspect_response(response, self)
+        exit(1)
         """
+
         injury_table_rows = response.xpath('//div[@id="yw1"]/table//tbody/tr')
         # headers = ['season', 'injury', 'from', 'until', 'days', 'games_missed']
         for table_row in injury_table_rows:
             injury_array = table_row.xpath('td/text()').extract()
+            flags_zone = table_row.xpath('td[@class="rechts hauptlink wappen_verletzung"]/a')
+            player_team = None
+            player_national_team = None
+            if len(flags_zone) > 0:
+                player_team = flags_zone[0].xpath('img/@alt').get()
+            if len(flags_zone) > 1:
+                player_national_team = flags_zone[1].xpath('img/@alt').get()
             injury = {
                 "season": injury_array[0],
                 "injury": injury_array[1],
                 "from": injury_array[2],
                 "until": injury_array[3],
                 "days": injury_array[4],
+                "team": player_team or 'Unknown',
+                "national_team": player_national_team or 'Unknown'
             }
 
             item = {
