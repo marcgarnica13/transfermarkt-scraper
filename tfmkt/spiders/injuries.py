@@ -40,7 +40,6 @@ class InjuriesSpider(BaseSpider):
         @scrapes type href parent
         """
         # Get full table
-        print("extract")
         # By row push new objects
         injury_navigations = response.css("a.tm-pagination__link")
         injury_links = []
@@ -75,8 +74,6 @@ class InjuriesSpider(BaseSpider):
         inspect_response(response, self)
         exit(1)
         """
-        print("parse")
-
         injury_table_rows = response.xpath('//div[@id="yw1"]/table//tbody/tr')
         # headers = ['season', 'injury', 'from', 'until', 'days', 'games_missed']
         for table_row in injury_table_rows:
