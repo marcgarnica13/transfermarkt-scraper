@@ -71,12 +71,16 @@ class GamesUrlsSpider(BaseSpider):
     @cb_kwargs {"base": {"href": "some_href", "type": "league", "parent": {}}}
     @scrapes type href seasoned_href parent game_id date_iso date_display kickoff_time home_club away_club result
     """
-    # Find all table rows that contain game links
-    game_rows = response.xpath('//table//tbody/tr[.//a[@class="ergebnis-link"]]')
+    # Find all table rows that contain game links.
+    # NOTE: Transfermarkt dropped the `ergebnis-link` CSS class from the
+    # fixtures (gesamtspielplan) result anchors — the score links now carry an
+    # empty class. Key off the stable `/spielbericht/` href instead of the class
+    # (see CLAUDE.md "XPath Tips"); otherwise 0 games are extracted.
+    game_rows = response.xpath('//table//tbody/tr[.//a[contains(@href, "/spielbericht/")]]')
 
     for row in game_rows:
-      # Extract game link and ID
-      game_link = row.xpath('.//a[@class="ergebnis-link"]')
+      # Extract game link and ID (the score anchor is the /spielbericht/ link)
+      game_link = row.xpath('.//a[contains(@href, "/spielbericht/")]')
       href = game_link.xpath('@href').get()
 
       if not href:
