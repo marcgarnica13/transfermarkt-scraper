@@ -22,12 +22,15 @@ DOWNLOADER_MIDDLEWARES = {
 CLOSESPIDER_PAGECOUNT = 0
 
 # --- Throughput (single domain via Zyte SmartProxy) ---
-# Every request goes to transfermarkt.* through the Zyte proxy, so the real
-# concurrency ceiling is the *per-domain* limit (Scrapy default 8). At default 8
-# the prod competitions+clubs scrape (~4k requests) sustained only ~1 req/s and
-# crossed its 60-min job timeout. Raise both to 16 for headroom.
-CONCURRENT_REQUESTS = 16
-CONCURRENT_REQUESTS_PER_DOMAIN = 16
+# Every request goes to transfermarkt.* through the Zyte proxy. Raising per-domain
+# concurrency 8->16 was tried and REVERTED: a full prod run (2026-07-13) showed it
+# made the scrape SLOWER (domestic-clubs crawl ~65 min vs ~55 min at 8) — at higher
+# concurrency Transfermarkt bans harder, Zyte throttles harder (driver-log showed
+# response/banned + reset_backoff:149), so net throughput drops. The real bottleneck
+# is Zyte's ban-based throttling, not the concurrency ceiling; the job-timeout bump
+# to 90 min (db-ingestion) is the actual safeguard. Keep concurrency at the default 8.
+CONCURRENT_REQUESTS = 8
+CONCURRENT_REQUESTS_PER_DOMAIN = 8
 DOWNLOAD_TIMEOUT = 60          # default 180s — stop one hung request stalling the crawl
 RETRY_TIMES = 3               # default 2; 429/503 already in RETRY_HTTP_CODES.
                               # Keep modest: scrapy-zyte-smartproxy already retries
