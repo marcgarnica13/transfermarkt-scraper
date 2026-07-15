@@ -50,7 +50,12 @@ class GamesSpider(BaseSpider):
     # inspect_response(response, self)
     # exit(1)
 
-    game_links = response.css('a.ergebnis-link')
+    # NOTE: Transfermarkt intermittently drops the `ergebnis-link` CSS class
+    # from the fixtures (gesamtspielplan) result anchors (observed removed on
+    # 2026-07-08, present again on 2026-07-15). Key off the stable
+    # `/spielbericht/` href instead of the class — same fix as games_urls
+    # (PR #5); otherwise 0 games are extracted when the class is absent.
+    game_links = response.xpath('//a[contains(@href, "/spielbericht/")]')
     for game_link in game_links:
       href = game_link.xpath('@href').get()
 
