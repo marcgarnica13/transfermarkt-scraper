@@ -118,9 +118,9 @@ class CompetitionsSpider(BaseSpider):
                     }
                     
         # Add manual competitions for Brazil
-        # These are served under '/pokalwettbewerb/' (cup-format URLs), so the
-        # auto-discovery code regex (/wettbewerb/([^/]+)$) never assigns them a
-        # competition_code; they are also skipped by the tier exclusion list.
+        # These are served under '/pokalwettbewerb/' (cup-format URLs). Sub-20 and
+        # Copinha sit in tiers skipped by the auto-discovery exclusion list, and
+        # listing them here pins the competition_type for all four.
         if base['country_id'] == '26':  # Brazil
             manual_competitions = [
                 {
@@ -266,7 +266,7 @@ class CompetitionsSpider(BaseSpider):
                         competition_href = '/liga-mx-clausura/startseite/wettbewerb/MEX1'
                     if competition_href in ('/torneo-clausura/startseite/wettbewerb/ARGC'):
                         competition_href = '/torneo-apertura/startseite/wettbewerb/ARG1'
-                    match_code = re.search(r'/wettbewerb/([^/]+)$', competition_href)
+                    match_code = re.search(r'/(?:pokal)?wettbewerb/([^/]+)$', competition_href)
                     competition_code = match_code.group(1) if match_code else None
 
                     competition_key = f"{base['country_id']}_{competition_code}"
