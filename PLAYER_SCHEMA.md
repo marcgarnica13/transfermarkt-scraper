@@ -31,7 +31,7 @@ interface Player {
     country: string | null;          // Country name (e.g., "Spain")
     city: string | null;             // City name (e.g., "Esplugues de Llobregat")
   };
-  citizenship: string | null;        // Primary citizenship (e.g., "Spain")
+  citizenship: string[] | null;      // All citizenships in page order (e.g., ["Spain", "Equatorial Guinea"])
   date_of_death: string | null;      // Only for deceased players
 
   // === Physical Attributes ===
@@ -364,7 +364,7 @@ The `result_type` is determined by the score and which team the player represent
     "country": "Spain",
     "city": "Esplugues de Llobregat"
   },
-  "citizenship": "Spain",
+  "citizenship": ["Spain", "Equatorial Guinea"],
   "height": "1,80 m",
   "foot": "left",
   "position": "Right Winger",

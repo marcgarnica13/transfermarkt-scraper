@@ -45,12 +45,26 @@ def scraped_attributes(spider, response, href):
   return results[0].cb_kwargs['attributes']
 
 
+def blank_flag_titles(html):
+  """Blank out every flag title in the 'Citizenship:' value span."""
+  def blank(match):
+    return re.sub(r'title="[^"]*"', 'title=" "', match.group(0))
+  stripped, n = re.subn(
+    r'<span[^>]*>Citizenship:</span>\s*<span[^>]*>.*?</span>', blank, html, flags=re.DOTALL
+  )
+  assert n >= 1, 'fixture has no Citizenship row to blank'
+  return stripped
+
+
 CASES = [
   # (label, fixture html loader, href, expected citizenship)
   # diego_costa.html: live profile fetched 2026-10-01, page lists Spain then Brazil
-  ('dual', lambda: read_sample('diego_costa.html'), '/diego-costa/profil/spieler/44779', 'Spain, Brazil'),
-  ('single', lambda: read_sample('casado.html'), '/marc-casado/profil/spieler/576024', 'Spain'),
+  ('dual', lambda: read_sample('diego_costa.html'), '/diego-costa/profil/spieler/44779', ['Spain', 'Brazil']),
+  ('single', lambda: read_sample('casado.html'), '/marc-casado/profil/spieler/576024', ['Spain']),
+  # heung_min_son.html: live profile fetched 2026-10-01, a comma inside a country name stays one element
+  ('comma in name', lambda: read_sample('heung_min_son.html'), '/heung-min-son/profil/spieler/91845', ['Korea, South']),
   ('missing', lambda: remove_citizenship(read_sample('diego_costa.html')), '/diego-costa/profil/spieler/44779', None),
+  ('blank titles', lambda: blank_flag_titles(read_sample('diego_costa.html')), '/diego-costa/profil/spieler/44779', None),
 ]
 
 
