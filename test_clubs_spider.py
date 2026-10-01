@@ -43,3 +43,23 @@ def test_squad_url_keeps_season_when_explicitly_requested(tmp_path):
         "https://www.transfermarkt.co.uk/trau-fc/kader/verein/36765/saison_id/2025/plus/1",
         "https://www.transfermarkt.co.uk/platense-ii/kader/verein/99999/saison_id/2025/plus/1",
     ]
+
+
+def test_older_season_rows_for_same_club_are_still_skipped(tmp_path):
+    """Pins existing season-dedupe: a club listed under 2026 and 2025 is requested once."""
+    html = """
+    <div class="responsive-table"><table><thead><tr><th>club</th></tr></thead><tbody>
+    <tr><td></td><td><a href="/a/startseite/verein/1/saison_id/2026">A</a></td></tr>
+    <tr><td></td><td><a href="/a/startseite/verein/1/saison_id/2025">A (previous season)</a></td></tr>
+    </tbody></table></div>
+    """
+    parents = tmp_path / "parents.json"
+    parents.write_text("")
+    spider = ClubsSpider(parents=str(parents))
+    response = HtmlResponse(
+        url="https://www.transfermarkt.co.uk/some-league/startseite/wettbewerb/XX1",
+        body=html.encode(),
+        encoding="utf-8",
+    )
+    urls = [r.url.split(".uk")[1] for r in spider.parse(response, parent={})]
+    assert urls == ["/a/kader/verein/1/plus/1"]
