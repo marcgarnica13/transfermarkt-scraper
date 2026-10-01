@@ -268,12 +268,13 @@ class PlayersSpider(BaseSpider):
     }
     attributes['age'] = self._extract_age(response)
     attributes['height'] = response.xpath("//span[text()='Height:']/following::span[1]/text()").get()
-    # Dual nationals have one flag per citizenship; join all of them like the squad 'nationality' field in clubs.py
-    attributes['citizenship'] = ", ".join(
+    # One flag per citizenship (dual nationals have several), kept as a list in page order since
+    # country names can contain commas (e.g. 'Korea, South'); None rather than an empty list
+    attributes['citizenship'] = [
       t.strip()
       for t in response.xpath("//span[text()='Citizenship:']/following::span[1]/img/@title").getall()
       if t and t.strip()
-    ) or None
+    ] or None
     attributes['position'] = self.safe_strip(response.xpath("//span[text()='Position:']/following::span[1]/text()").get())
     
     # The agent name can either be inside the anchor tag, title of the anchor tag or 

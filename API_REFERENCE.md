@@ -274,7 +274,7 @@ interface Player {
   };
   age: string;
   height: string;
-  citizenship: string;
+  citizenship: string[] | null;
   position: string;
   player_agent: {
     href: string;

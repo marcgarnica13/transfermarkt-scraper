@@ -1007,7 +1007,7 @@ Different spiders implement deduplication at various levels:
   },
   "age": "27",
   "height": "1,88 m",
-  "citizenship": "Brazil",
+  "citizenship": ["Brazil"],
   "position": "Goalkeeper",
   "player_agent": {
     "href": "/agent-href",
