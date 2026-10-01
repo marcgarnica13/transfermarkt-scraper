@@ -84,7 +84,16 @@ class ClubsSpider(BaseSpider):
                 }
             }
 
-            squad_url = club_href.replace("/startseite/", "/kader/") + "/plus/1"
+            # Without an explicit season, drop any /saison_id/ the participants page
+            # pinned on the club link: some clubs link to an old season (e.g. 2022),
+            # which would crawl a stale roster forever. Transfermarkt then serves the
+            # club's current squad.
+            squad_href = (
+                club_href
+                if getattr(self, "season", None) is not None
+                else re.sub(r"/saison_id/\d+", "", club_href)
+            )
+            squad_url = squad_href.replace("/startseite/", "/kader/") + "/plus/1"
             yield response.follow(squad_url, self.parse_details, cb_kwargs=cb_kwargs)
 
     def parse_details(self, response, base):
